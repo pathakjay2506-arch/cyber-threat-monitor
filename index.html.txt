@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cyber Threat Monitor | Jay Pathak</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#050A14;color:#C8D6E5;font-family:'Inter',sans-serif;min-height:100vh;padding:20px;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border:1px solid #0D2137;border-radius:12px;margin-bottom:16px;background:#0A1628;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:36px;height:36px;background:#0F3460;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.logo-icon svg{width:20px;height:20px;stroke:#00D4FF;fill:none;stroke-width:2;}
+.title{font-family:'Share Tech Mono',monospace;font-size:16px;color:#E8F4FF;letter-spacing:3px;}
+.subtitle{font-size:11px;color:#4A7FA5;letter-spacing:1px;margin-top:2px;}
+.header-right{display:flex;align-items:center;gap:24px;}
+.status-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:#00D4FF;background:#001F33;padding:6px 14px;border-radius:20px;border:1px solid #0D4060;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#00FF88;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.4)}}
+.clock{font-family:'Share Tech Mono',monospace;font-size:14px;color:#4A7FA5;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+.stat-card{background:#0A1628;border:1px solid #0D2137;border-radius:10px;padding:16px 20px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.red::before{background:linear-gradient(90deg,#FF3B3B,transparent);}
+.stat-card.amber::before{background:linear-gradient(90deg,#FFB800,transparent);}
+.stat-card.green::before{background:linear-gradient(90deg,#00FF88,transparent);}
+.stat-card.blue::before{background:linear-gradient(90deg,#00D4FF,transparent);}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#4A7FA5;margin-bottom:8px;}
+.stat-value{font-family:'Share Tech Mono',monospace;font-size:28px;font-weight:500;}
+.stat-value.red{color:#FF3B3B;}
+.stat-value.amber{color:#FFB800;}
+.stat-value.green{color:#00FF88;}
+.stat-value.blue{color:#00D4FF;}
+.stat-sub{font-size:11px;color:#2A4A60;margin-top:6px;}
+.stat-trend{font-size:11px;color:#00FF88;}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.panel{background:#0A1628;border:1px solid #0D2137;border-radius:12px;padding:20px;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.panel-title{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#4A7FA5;}
+.panel-badge{font-size:10px;padding:3px 10px;border-radius:10px;background:#001F33;color:#00D4FF;border:1px solid #0D4060;}
+.radar-container{display:flex;justify-content:center;padding:10px 0;}
+svg.radar{width:200px;height:200px;}
+.sweep{transform-origin:100px 100px;animation:sweep 4s linear infinite;}
+@keyframes sweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.blip{animation:blip 4s infinite;}
+.blip2{animation:blip 4s 1.3s infinite;}
+.blip3{animation:blip 4s 2.6s infinite;}
+@keyframes blip{0%,100%{opacity:0;r:3}25%,50%{opacity:1;r:5}75%{opacity:0.5;r:4}}
+.radar-legend{display:flex;justify-content:center;gap:20px;font-size:11px;color:#4A7FA5;margin-top:10px;}
+.radar-legend span{display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+.threat-feed{display:flex;flex-direction:column;gap:0;}
+.threat-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #0D2137;font-size:12px;}
+.threat-item:last-child{border-bottom:none;}
+.threat-badge{font-size:10px;padding:3px 8px;border-radius:6px;font-weight:600;white-space:nowrap;min-width:64px;text-align:center;}
+.badge-critical{background:#1A0505;color:#FF3B3B;border:1px solid #3A0808;}
+.badge-high{background:#1A0D00;color:#FFB800;border:1px solid #3A2000;}
+.badge-medium{background:#0A1A2A;color:#00D4FF;border:1px solid #0D3060;}
+.badge-blocked{background:#001A0A;color:#00FF88;border:1px solid #003018;}
+.threat-info{flex:1;}
+.threat-desc{color:#C8D6E5;margin-bottom:2px;}
+.threat-ip{font-family:'Share Tech Mono',monospace;font-size:10px;color:#2A5A7A;}
+.threat-time{font-family:'Share Tech Mono',monospace;font-size:10px;color:#2A4A60;}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.log-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #0D2137;font-family:'Share Tech Mono',monospace;font-size:11px;}
+.log-item:last-child{border-bottom:none;}
+.log-time{color:#2A5A7A;white-space:nowrap;}
+.log-ok{color:#00FF88;}
+.log-alert{color:#FF3B3B;}
+.log-warn{color:#FFB800;}
+.log-info{color:#00D4FF;}
+.score-section{display:flex;align-items:center;gap:20px;margin-bottom:16px;}
+.score-num{font-family:'Share Tech Mono',monospace;font-size:52px;color:#00FF88;line-height:1;}
+.score-label{font-size:11px;color:#4A7FA5;}
+.score-grade{font-size:14px;color:#00FF88;font-weight:600;margin-top:4px;}
+.score-bars{flex:1;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:11px;}
+.bar-name{width:90px;color:#4A7FA5;}
+.bar-track{flex:1;height:5px;background:#0D2137;border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width 2s ease;}
+.bar-val{width:28px;text-align:right;font-family:'Share Tech Mono',monospace;font-size:11px;color:#4A7FA5;}
+.map-section{padding:10px 0;}
+.map-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.map-item{background:#050F1E;border:1px solid #0D2137;border-radius:8px;padding:10px;font-size:11px;}
+.map-country{color:#C8D6E5;margin-bottom:4px;}
+.map-count{font-family:'Share Tech Mono',monospace;font-size:16px;color:#FF3B3B;}
+.map-type{color:#2A5A7A;font-size:10px;}
+footer{text-align:center;margin-top:20px;font-size:11px;color:#1A3A52;font-family:'Share Tech Mono',monospace;letter-spacing:1px;}
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .main-grid,.bottom-grid{grid-template-columns:1fr;}
+  .header{flex-direction:column;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L3 7v5c0 5 4 9.5 9 11 5-1.5 9-6 9-11V7L12 2z"/></svg>
+    </div>
+    <div>
+      <div class="title">CYBER THREAT MONITOR</div>
+      <div class="subtitle">REAL-TIME SECURITY OPERATIONS CENTER</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-pill"><span class="live-dot"></span>SYSTEMS OPERATIONAL</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card red">
+    <div class="stat-label">Threats Blocked</div>
+    <div class="stat-value red" id="s1">0</div>
+    <div class="stat-sub"><span class="stat-trend">↑ 12%</span> from yesterday</div>
+  </div>
+  <div class="stat-card amber">
+    <div class="stat-label">Attacks Today</div>
+    <div class="stat-value amber" id="s2">0</div>
+    <div class="stat-sub">Last detected 4 mins ago</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-label">Systems Online</div>
+    <div class="stat-value green" id="s3">0</div>
+    <div class="stat-sub">2 nodes in maintenance</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-label">Uptime</div>
+    <div class="stat-value blue">99.8%</div>
+    <div class="stat-sub">127 days stable</div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">● Threat Radar</div>
+      <div class="panel-badge">LIVE SCAN</div>
+    </div>
+    <div class="radar-container">
+      <svg class="radar" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="90" fill="none" stroke="#0D2137" stroke-width="1"/>
+        <circle cx="100" cy="100" r="65" fill="none" stroke="#0D2137" stroke-width="1"/>
+        <circle cx="100" cy="100" r="40" fill="none" stroke="#0D2137" stroke-width="1"/>
+        <circle cx="100" cy="100" r="15" fill="none" stroke="#0D3060" stroke-width="1"/>
+        <line x1="100" y1="10" x2="100" y2="190" stroke="#0D2137" stroke-width="1"/>
+        <line x1="10" y1="100" x2="190" y2="100" stroke="#0D2137" stroke-width="1"/>
+        <line x1="36" y1="36" x2="164" y2="164" stroke="#071828" stroke-width="1"/>
+        <line x1="164" y1="36" x2="36" y2="164" stroke="#071828" stroke-width="1"/>
+        <g class="sweep">
+          <line x1="100" y1="100" x2="100" y2="12" stroke="#00FF88" stroke-width="1.5" opacity="0.9"/>
+          <path d="M100,100 L100,12 A88,88 0 0,1 152,132 Z" fill="#00FF8808"/>
+        </g>
+        <circle class="blip" cx="140" cy="60" r="5" fill="#FF3B3B" stroke="#FF3B3B22" stroke-width="8"/>
+        <circle class="blip2" cx="70" cy="140" r="4" fill="#FFB800" stroke="#FFB80022" stroke-width="6"/>
+        <circle class="blip3" cx="155" cy="110" r="5" fill="#FF3B3B" stroke="#FF3B3B22" stroke-width="8"/>
+        <circle cx="100" cy="100" r="4" fill="#00FF88"/>
+        <circle cx="100" cy="100" r="8" fill="none" stroke="#00FF88" stroke-width="1" opacity="0.4"/>
+      </svg>
+    </div>
+    <div class="radar-legend">
+      <span><span class="dot" style="background:#FF3B3B"></span>Critical</span>
+      <span><span class="dot" style="background:#FFB800"></span>Warning</span>
+      <span><span class="dot" style="background:#00FF88"></span>Safe zone</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">⚠ Live Threat Feed</div>
+      <div class="panel-badge" id="threat-count">4 ACTIVE</div>
+    </div>
+    <div class="threat-feed">
+      <div class="threat-item">
+        <span class="threat-badge badge-critical">CRITICAL</span>
+        <div class="threat-info">
+          <div class="threat-desc">SQL Injection attempt detected</div>
+          <div class="threat-ip">192.168.4.21 → Port 3306 (MySQL)</div>
+        </div>
+        <div class="threat-time" id="tt1">--:--</div>
+      </div>
+      <div class="threat-item">
+        <span class="threat-badge badge-high">HIGH</span>
+        <div class="threat-info">
+          <div class="threat-desc">Brute force SSH login attempt</div>
+          <div class="threat-ip">45.33.32.156 → Port 22 (SSH)</div>
+        </div>
+        <div class="threat-time" id="tt2">--:--</div>
+      </div>
+      <div class="threat-item">
+        <span class="threat-badge badge-high">HIGH</span>
+        <div class="threat-info">
+          <div class="threat-desc">Port scan from external IP</div>
+          <div class="threat-ip">203.0.113.9 → Ports 1–1024</div>
+        </div>
+        <div class="threat-time" id="tt3">--:--</div>
+      </div>
+      <div class="threat-item">
+        <span class="threat-badge badge-medium">MEDIUM</span>
+        <div class="threat-info">
+          <div class="threat-desc">Suspicious API rate exceeded</div>
+          <div class="threat-ip">10.0.0.44 → Port 443 (HTTPS)</div>
+        </div>
+        <div class="threat-time" id="tt4">--:--</div>
+      </div>
+      <div class="threat-item">
+        <span class="threat-badge badge-blocked">BLOCKED</span>
+        <div class="threat-info">
+          <div class="threat-desc">XSS payload blocked by WAF</div>
+          <div class="threat-ip">172.16.0.8 → Port 80 (HTTP)</div>
+        </div>
+        <div class="threat-time" id="tt5">--:--</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-grid">
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">▶ System Log</div>
+      <div class="panel-badge">STREAMING</div>
+    </div>
+    <div id="log-container">
+      <div class="log-item"><span class="log-time" id="lt1">--:--:--</span><span class="log-ok">[OK]    Firewall rules updated successfully</span></div>
+      <div class="log-item"><span class="log-time" id="lt2">--:--:--</span><span class="log-alert">[ALERT] Intrusion attempt — IP blocked</span></div>
+      <div class="log-item"><span class="log-time" id="lt3">--:--:--</span><span class="log-warn">[WARN]  High CPU usage on node-03</span></div>
+      <div class="log-item"><span class="log-time" id="lt4">--:--:--</span><span class="log-info">[INFO]  SSL certificate renewed</span></div>
+      <div class="log-item"><span class="log-time" id="lt5">--:--:--</span><span class="log-ok">[OK]    Backup completed (12.4 GB)</span></div>
+      <div class="log-item"><span class="log-time" id="lt6">--:--:--</span><span class="log-info">[INFO]  IDS signatures updated</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">◈ Security Score</div>
+      <div class="panel-badge">GOOD</div>
+    </div>
+    <div class="score-section">
+      <div>
+        <div class="score-num" id="score-num">0</div>
+        <div class="score-label">out of 100</div>
+        <div class="score-grade">Grade: B+</div>
+      </div>
+      <div class="score-bars">
+        <div class="bar-row">
+          <span class="bar-name">Firewall</span>
+          <div class="bar-track"><div class="bar-fill" id="b1" style="width:0%;background:#00FF88;"></div></div>
+          <span class="bar-val">95</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-name">Encryption</span>
+          <div class="bar-track"><div class="bar-fill" id="b2" style="width:0%;background:#00D4FF;"></div></div>
+          <span class="bar-val">88</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-name">Patching</span>
+          <div class="bar-track"><div class="bar-fill" id="b3" style="width:0%;background:#FFB800;"></div></div>
+          <span class="bar-val">72</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-name">Auth (MFA)</span>
+          <div class="bar-track"><div class="bar-fill" id="b4" style="width:0%;background:#00FF88;"></div></div>
+          <span class="bar-val">90</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-name">Monitoring</span>
+          <div class="bar-track"><div class="bar-fill" id="b5" style="width:0%;background:#00D4FF;"></div></div>
+          <span class="bar-val">85</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid #0D2137;padding-top:14px;margin-top:4px;">
+      <div class="panel-title" style="margin-bottom:12px;">Top Attack Sources</div>
+      <div class="map-grid">
+        <div class="map-item">
+          <div class="map-country">Russia</div>
+          <div class="map-count" id="c1">0</div>
+          <div class="map-type">DDoS / Brute Force</div>
+        </div>
+        <div class="map-item">
+          <div class="map-country">China</div>
+          <div class="map-count" id="c2">0</div>
+          <div class="map-type">Port Scanning</div>
+        </div>
+        <div class="map-item">
+          <div class="map-country">Unknown</div>
+          <div class="map-count" id="c3">0</div>
+          <div class="map-type">SQL Injection</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <br>BUILT BY JAY PATHAK &nbsp;|&nbsp; DEVOPS & CYBERSECURITY ENGINEER &nbsp;|&nbsp; GITHUB: pathakjay2506-arch
+</footer>
+
+<script>
+function pad(n){return String(n).padStart(2,'0')}
+function timeStr(offset){
+  const d=new Date(Date.now()-offset*60000);
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+// Clock
+function updateClock(){
+  const d=new Date();
+  document.getElementById('clock').textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+updateClock();
+setInterval(updateClock,1000);
+
+// Threat times
+[1,4,7,12,15].forEach((m,i)=>{
+  document.getElementById('tt'+(i+1)).textContent=timeStr(m).slice(0,5);
+});
+
+// Log times
+[2,5,8,11,15,20].forEach((m,i)=>{
+  document.getElementById('lt'+(i+1)).textContent=timeStr(m);
+});
+
+// Count up animation
+function countUp(el,target,duration){
+  let start=null;
+  function step(ts){
+    if(!start)start=ts;
+    const p=Math.min((ts-start)/duration,1);
+    el.textContent=Math.round(p*target).toLocaleString();
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+countUp(document.getElementById('s1'),2847,2500);
+countUp(document.getElementById('s2'),143,1800);
+countUp(document.getElementById('s3'),48,1200);
+countUp(document.getElementById('score-num'),87,2000);
+countUp(document.getElementById('c1'),342,2000);
+countUp(document.getElementById('c2'),289,2000);
+countUp(document.getElementById('c3'),117,2000);
+
+// Animate bars
+setTimeout(()=>{
+  [['b1',95],['b2',88],['b3',72],['b4',90],['b5',85]].forEach(([id,val])=>{
+    document.getElementById(id).style.width=val+'%';
+  });
+},300);
+
+// Live log stream
+const logMessages=[
+  ['log-ok','[OK]    New firewall rule applied'],
+  ['log-alert','[ALERT] Port scan blocked from 198.51.100.4'],
+  ['log-info','[INFO]  Vulnerability scan completed'],
+  ['log-warn','[WARN]  Disk usage at 78% on server-01'],
+  ['log-ok','[OK]    Patch KB5034441 applied'],
+  ['log-info','[INFO]  User admin logged in from 10.0.0.1'],
+];
+let logIdx=0;
+setInterval(()=>{
+  const container=document.getElementById('log-container');
+  const msg=logMessages[logIdx%logMessages.length];
+  const d=new Date();
+  const timeStr=`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  const item=document.createElement('div');
+  item.className='log-item';
+  item.innerHTML=`<span class="log-time">${timeStr}</span><span class="${msg[0]}">${msg[1]}</span>`;
+  container.insertBefore(item,container.firstChild);
+  if(container.children.length>8)container.removeChild(container.lastChild);
+  logIdx++;
+},4000);
+</script>
+</body>
+</html>
